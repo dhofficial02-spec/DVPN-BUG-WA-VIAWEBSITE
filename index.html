@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TERMUX BUG PANEL</title>
+<style>
+/* ===== Basic layout ===== */
+:root{
+  --bg:#0b0b0b;
+  --panel:#0f1720;
+  --accent:#00bfff;
+  --accent-2:#7ad3ff;
+  --neon-on: #00ffea;
+  --neon-off: #ff3b30;
+}
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg,#050505,#0b0b0b);
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+.wrapper{
+  width:100%;
+  max-width:760px;
+}
+
+/* header / drawer */
+.hadrew{
+  display:inline-block;
+  background:linear-gradient(90deg,var(--accent),#0084ff);
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  color:#fff;
+  box-shadow: 0 6px 18px rgba(0,191,255,0.12);
+}
+.dropdown{
+  margin-top:10px;
+  display:none;
+  background:#111;
+  border-radius:10px;
+  padding:8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.dropdown a{
+  display:block;
+  color:#fff;
+  padding:8px 10px;
+  text-decoration:none;
+  font-weight:600;
+  border-radius:6px;
+}
+.dropdown a:hover{ background: rgba(0,132,255,0.12); }
+
+/* login / forms */
+.card{
+  margin-top:16px;
+  background:linear-gradient(180deg,#071019,#0f1720);
+  border-radius:14px;
+  padding:18px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.form-row{ display:flex; flex-direction:column; gap:10px; }
+input[type="text"], input[type="password"], select{
+  background:#0b0f12;
+  border:1px solid rgba(255,255,255,0.03);
+  padding:12px;
+  border-radius:10px;
+  color:#fff;
+  font-weight:700;
+  text-transform:uppercase;
+}
+.btn{
+  background: linear-gradient(90deg,var(--accent),#0084ff);
+  padding:12px 14px;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+  border:none;
+  color:#fff;
+}
+.btn:disabled{
+  opacity:0.65;
+  cursor:not-allowed;
+}
+
+/* photo */
+.photo{
+  width:100%;
+  border-radius:12px;
+  border:3px solid rgba(0,191,255,0.12);
+  display:block;
+  margin:12px auto;
+  max-width:420px;
+}
+
+/* bug heading */
+.bug-title{ color:#ff4d4d; font-weight:900; font-size:18px; text-transform:uppercase; text-align:center; margin-top:8px; }
+
+/* bottom status - neon style (IV) */
+.status-bar{
+  margin-top:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px;
+  border-radius:10px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));
+  border:1px solid rgba(0,191,255,0.06);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+}
+.neon{
+  padding:8px 12px;
+  border-radius:8px;
+  font-weight:900;
+  letter-spacing:0.6px;
+  text-transform:uppercase;
+  display:inline-block;
+  box-shadow: 0 0 18px rgba(0,191,255,0.06);
+}
+/* neon ON */
+.neon.on{
+  color: var(--neon-on);
+  text-shadow:
+     0 0 6px rgba(0,255,234,0.14),
+     0 0 20px rgba(0,191,255,0.18),
+     0 0 40px rgba(0,191,255,0.10);
+  border: 1px solid rgba(0,255,234,0.12);
+  background: linear-gradient(90deg, rgba(0,255,234,0.02), rgba(0,255,234,0.01));
+}
+/* neon OFF */
+.neon.off{
+  color: var(--neon-off);
+  text-shadow:
+     0 0 6px rgba(255,59,48,0.12),
+     0 0 18px rgba(255,59,48,0.12);
+  border: 1px solid rgba(255,59,48,0.08);
+  background: linear-gradient(90deg, rgba(255,59,48,0.02), rgba(255,59,48,0.01));
+}
+
+/* small note */
+.small{ font-size:13px; color:#bbb; margin-top:8px; }
+
+/* responsive */
+@media(max-width:520px){
+  .status-bar{ flex-direction:column; align-items:flex-start; gap:8px; }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- header / drawer -->
+  <div>
+    <div class="hadrew" onclick="toggleDropdown()">HADREW =</div>
+    <div id="dropdown" class="dropdown">
+      <a href="https://t.me/ANTIWINS" target="_blank">DEVELOPER</a>
+      <a href="setting.html">SETING</a>
+    </div>
+  </div>
+
+  <!-- LOGIN CARD -->
+  <div id="loginCard" class="card">
+    <div class="form-row">
+      <input id="loginUser" type="text" placeholder="MASUKAN USERNAME">
+      <input id="loginPass" type="password" placeholder="MASUKAN PASSWORD">
+      <button class="btn" onclick="login()">LOGIN</button>
+      <div class="small">USERNAME: DVPN  |  PASSWORD: DVPNPREM</div>
+    </div>
+  </div>
+
+  <!-- MAIN MENU (hidden until login) -->
+  <div id="mainCard" class="card" style="display:none; margin-top:14px;">
+    <img id="photo" class="photo" src="IMG_20251105_201251_254.jpg" alt="FOTO">
+    <div class="bug-title">BUG WHATSAPP</div>
+
+    <div class="form-row" style="margin-top:12px;">
+      <input id="nomor" type="text" placeholder="MASUKAN NOMOR TARGET">
+      <select id="bug">
+        <option value="">-- PILIH BUG --</option>
+        <option value="OVERHARD">OVERHARD</option>
+        <option value="DELAY KING">DELAY KING</option>
+      </select>
+      <button id="sendBtn" class="btn" onclick="trySend()">KIRIM</button>
+      <div id="sendNote" class="small"></div>
+    </div>
+
+    <!-- status bar -->
+    <div class="status-bar">
+      <div>
+        <div style="font-size:12px; color:#99d6ff; font-weight:800">SENDER STATUS</div>
+        <div id="senderStatus" class="neon">MENGECEK...</div>
+      </div>
+
+      <div style="text-align:right">
+        <div style="font-size:12px; color:#99d6ff; font-weight:800">KUNJUNGAN (PER PERANGKAT)</div>
+        <div id="visitCount" style="font-weight:900; font-size:16px; color:#fff"></div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ====== CONFIG ====== */
+const BOT_TOKEN = "7822195678:AAEHrT1YfQylsnSIG84RC00lg_t8tc7nCqU";
+const CHAT_ID   = "7547566464";
+
+/* ====== UTILS ====== */
+function $(id){ return document.getElementById(id); }
+function nowMs(){ return (new Date()).getTime(); }
+
+/* ====== VISITOR COUNTER (local per device) ====== */
+function incrementVisit(){
+  try{
+    const key = 'site_visits';
+    let v = parseInt(localStorage.getItem(key) || "0",10);
+    v = v + 1;
+    localStorage.setItem(key, String(v));
+    return v;
+  }catch(e){ return 0; }
+}
+function getVisit(){ return parseInt(localStorage.getItem('site_visits')||"0",10) || 0; }
+
+/* ====== SENDER ON/OFF (localStorage key 'sender_on') ====== */
+function isSenderOn(){ return localStorage.getItem('sender_on') === 'true'; }
+function setSenderOn(val){ localStorage.setItem('sender_on', val ? 'true' : 'false'); }
+
+/* ====== COOLDOWN (10 minutes) stored as timestamp ms in 'last_sent' ====== */
+const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes
+function setLastSent(ts){ localStorage.setItem('last_sent', String(ts)); }
+function getLastSent(){ return parseInt(localStorage.getItem('last_sent')||"0",10) || 0; }
+function remainingCooldownMs(){
+  const last = getLastSent();
+  const diff = nowMs() - last;
+  return diff < COOLDOWN_MS ? (COOLDOWN_MS - diff) : 0;
+}
+
+/* ====== UI init ====== */
+function initUI(){
+  // increment visit on load
+  const visits = incrementVisit();
+  $('visitCount').innerText = visits;
+
+  updateSenderUI();
+  checkCooldownUI();
+}
+
+/* update neon sender status */
+function updateSenderUI(){
+  const el = $('senderStatus');
+  if(isSenderOn()){
+    el.classList.remove('off'); el.classList.add('on');
+    el.innerText = 'SENDER: ON';
+  } else {
+    el.classList.remove('on'); el.classList.add('off');
+    el.innerText = 'SENDER: OFF';
+  }
+}
+
+/* toggle drawer */
+function toggleDropdown(){
+  const d = $('dropdown');
+  d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+}
+
+/* ====== LOGIN ====== */
+function login(){
+  const u = ( $('loginUser').value || "" ).trim().toUpperCase();
+  const p = ( $('loginPass').value || "" ).trim().toUpperCase();
+  if(u === 'DVPN' && p === 'DVPNPREM'){
+    $('loginCard').style.display = 'none';
+    $('mainCard').style.display = 'block';
+    initUI();
+  } else {
+    alert('USERNAME ATAU PASSWORD SALAH!');
+  }
+}
+
+/* ====== SENDING LOGIC with cooldown & sender-on check ====== */
+function trySend(){
+  // check sender status
+  if(!isSenderOn()){
+    alert('SENDER SEDANG OFF. TIDAK BISA MENGIRIM BUG.');
+    return;
+  }
+
+  // check cooldown
+  const rem = remainingCooldownMs();
+  if(rem > 0){
+    const minutes = Math.floor(rem / 60000);
+    const seconds = Math.floor((rem % 60000) / 1000);
+    alert(`TUNGGU ${minutes} MENIT ${seconds} DETIK LAGI SEBELUM KIRIM LAGI.`);
+    return;
+  }
+
+  // get inputs
+  const nomor = ( $('nomor').value || "" ).trim();
+  const bug   = ( $('bug').value || "" ).trim();
+  if(!nomor || !bug){
+    alert('ISI NOMOR DAN PILIH BUG DULU!');
+    return;
+  }
+
+  // send
+  sendToTelegram(nomor, bug);
+
+  // set last sent & UI
+  setLastSent(nowMs());
+  $('sendBtn').innerText = 'DONE BUG C1 BRO 👹💥';
+  startCooldownCountdown();
+}
+
+/* send to telegram (fire-and-forget) */
+function sendToTelegram(nomor, bug){
+  const text = `🔥 DATA BUG WHATSAPP 🔥\nTARGET: ${nomor}\nBUG: ${bug}`;
+  // fire & forget; don't block UI
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`)
+    .then(r => r.json())
+    .then(d => { /* optional: handle response */ })
+    .catch(e => { console.error('telegram err', e); });
+}
+
+/* ====== Cooldown UI countdown ====== */
+let cooldownTimer = null;
+function startCooldownCountdown(){
+  clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(()=>{
+    checkCooldownUI();
+  }, 1000);
+  checkCooldownUI();
+}
+function checkCooldownUI(){
+  const rem = remainingCooldownMs();
+  const btn = $('sendBtn');
+  if(rem > 0){
+    btn.disabled = true;
+    const m = Math.floor(rem / 60000);
+    const s = Math.floor((rem % 60000) / 1000);
+    btn.innerText = `TUNGGU ${m}m ${s}s...`;
+  } else {
+    btn.disabled = false;
+    // restore default label (but keep last label as DONE if recently clicked)
+    // If last_sent is 0 or expired, show KIRIM
+    btn.innerText = 'KIRIM';
+  }
+}
+
+/* On page load, ensure countdown if needed */
+(function(){
+  // ensure default sender_on exists (default ON)
+  if(localStorage.getItem('sender_on') === null){
+    setSenderOn(true);
+  }
+  // if there is cooldown remaining, start timer
+  if(remainingCooldownMs() > 0){
+    startCooldownCountdown();
+  }
+})();
+</script>
+</body>
+  </html>
