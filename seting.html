@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SETTING - TERMUX BUG PANEL</title>
+<style>
+:root{ --accent:#00bfff; --bg:#0b0b0b; --neon-on:#00ffea; --neon-off:#ff3b30; }
+body{ font-family: Arial, Helvetica, sans-serif; background:linear-gradient(180deg,#050505,#0b0b0b); color:#fff; padding:18px; display:flex; justify-content:center; }
+.container{ width:100%; max-width:720px; }
+.hadrew{ display:inline-block; padding:10px 12px; background:linear-gradient(90deg,var(--accent),#0084ff); border-radius:10px; font-weight:800; color:#fff; text-decoration:none; }
+.card{ background:#0f1720; padding:16px; border-radius:12px; margin-top:12px; border:1px solid rgba(255,255,255,0.02); }
+.label{ font-weight:800; color:#99e6ff; font-size:13px; text-transform:uppercase; }
+.small{ color:#bbb; font-size:13px; margin-top:6px; }
+.toggle{ width:60px; height:32px; border-radius:20px; background:#333; position:relative; cursor:pointer; }
+.knob{ position:absolute; top:4px; left:4px; width:24px; height:24px; border-radius:50%; background:#fff; transition:0.18s; }
+.neon-on{ color:var(--neon-on); text-shadow: 0 0 10px rgba(0,255,234,0.12); }
+.neon-off{ color:var(--neon-off); text-shadow: 0 0 8px rgba(255,59,48,0.10); }
+.input{ width:100%; padding:10px; border-radius:8px; background:#0b0f12; color:#fff; border:none; text-transform:uppercase; }
+.btn{ padding:10px 12px; background:linear-gradient(90deg,var(--accent),#0084ff); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="hadrew" href="index.html">◀ KEMBALI</a>
+  <h2 style="color:var(--accent); margin-top:8px">SETTING (ADMIN)</h2>
+
+  <!-- Key section -->
+  <div id="keyCard" class="card">
+    <div class="label">MASUKAN KEY ADMIN</div>
+    <input id="adminKey" class="input" placeholder="MASUKAN KEY (DIL)" />
+    <div style="margin-top:10px;">
+      <button class="btn" onclick="unlock()">BUKA SETTING</button>
+    </div>
+    <div id="keyMsg" class="small"></div>
+  </div>
+
+  <!-- Settings area (hidden until key correct) -->
+  <div id="settingsArea" style="display:none;">
+    <div class="card" style="margin-top:14px;">
+      <div class="label">SETING SENDER</div>
+      <div class="small">NYALAKAN / MATIKAN SENDER (BERLAKU UNTUK SEMUA USER)</div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+        <div id="senderState" class="small">STATE</div>
+        <div id="senderToggle" class="toggle" onclick="toggleSender()"><div id="knob" class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <div class="label">CEK PENGUNJUNG WEB (PER DEVICE)</div>
+      <div class="small">Jumlah kunjungan di perangkat ini (localStorage)</div>
+      <div style="margin-top:10px; font-weight:800; font-size:18px;" id="vCount">0</div>
+      <div style="margin-top:10px;">
+        <button class="btn" onclick="resetCount()">RESET COUNTER</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ADMIN_KEY = "DIL";
+
+/* local helpers */
+function getLocal(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:v; }catch(e){return d;} }
+function setLocal(k,v){ try{ localStorage.setItem(k,String(v)); }catch(e){} }
+
+/* unlock settings */
+function unlock(){
+  const k = (document.getElementById('adminKey').value||"").trim();
+  const msg = document.getElementById('keyMsg');
+  if(k === ADMIN_KEY){
+    msg.innerText = "KEY BENAR. SETTING TERBUKA.";
+    document.getElementById('keyCard').style.display = 'none';
+    document.getElementById('settingsArea').style.display = 'block';
+    loadSettings();
+  } else {
+    msg.innerText = "KEY SALAH!";
+  }
+}
+
+/* sender */
+function isSenderOn(){ return getLocal('sender_on','true') === 'true'; }
+function setSenderOn(v){ setLocal('sender_on', v ? 'true' : 'false'); updateSenderUI(); }
+
+/* toggle */
+function toggleSender(){ setSenderOn(!isSenderOn()); }
+
+/* update UI */
+function updateSenderUI(){
+  const state = document.getElementById('senderState');
+  const knob = document.getElementById('knob');
+  const holder = document.getElementById('senderToggle');
+  if(isSenderOn()){
+    state.innerText = 'SENDER: ON';
+    state.classList.remove('neon-off'); state.classList.add('neon-on');
+    knob.style.left = '32px';
+    holder.style.background = '#00bfff';
+  } else {
+    state.innerText = 'SENDER: OFF';
+    state.classList.remove('neon-on'); state.classList.add('neon-off');
+    knob.style.left = '4px';
+    holder.style.background = '#333';
+  }
+}
+
+/* visitor count per device */
+function loadSettings(){
+  updateSenderUI();
+  document.getElementById('vCount').innerText = parseInt(getLocal('site_visits','0'),10) || 0;
+}
+function resetCount(){
+  setLocal('site_visits','0');
+  loadSettings();
+  alert('VISITOR COUNTER DIRESET!');
+}
+</script>
+</body>
+</html>
